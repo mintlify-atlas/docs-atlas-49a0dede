@@ -224,6 +224,35 @@ type RemovableRef<T> = Ref<T> & {
 }
 ```
 
+## Additional Utilities
+
+### setupApp
+
+An application setup function used in the extension entry point.
+
+**Location**: `src/logic/common-setup.ts:3-15`
+
+```typescript
+function setupApp(app: App): void
+```
+
+Configures the Vue app with global properties and plugins. This function:
+- Injects a globally available `$app` object in templates
+- Provides access to `app` via `inject('app')` in script setup
+- Can be extended with additional plugins (i18n, router, etc.)
+
+### Environment Utilities
+
+**Location**: `src/env.ts:1-15`
+
+```typescript
+function isForbiddenUrl(url: string): boolean
+const isFirefox: boolean
+```
+
+- **isForbiddenUrl**: Checks if a URL is restricted (chrome://, edge://, etc.)
+- **isFirefox**: Boolean constant detecting Firefox browser
+
 ## Best Practices
 
 <AccordionGroup>
