@@ -1,0 +1,193 @@
+---
+title: Architecture
+description: Project structure, build system, and extension configuration for Your NewTab
+---
+
+Your NewTab is a browser extension built with modern web technologies that replaces the default new tab page with a customizable quote display.
+
+## Project Structure
+
+The extension follows a standard Vite-based project layout:
+
+```
+src/
+├── assets/          # Static assets (icons, images)
+├── composables/     # Vue composables (useWebExtensionStorage, useUI)
+├── logic/           # Business logic (fetcher, common setup)
+├── newtab/          # New tab page component and entry point
+├── styles/          # Global styles
+├── manifest.ts      # Extension manifest generator
+└── global.d.ts      # TypeScript declarations
+```
+
+### Key Directories
+
+<ParamField path="composables" type="directory">
+  Reusable Vue composition functions for storage and UI utilities
+</ParamField>
+
+<ParamField path="logic" type="directory">
+  Business logic and utility functions, including the fetch wrapper
+</ParamField>
+
+<ParamField path="newtab" type="directory">
+  Main new tab page component (`NewTab.vue`) and HTML entry point (`index.html`)
+</ParamField>
+
+## Build System
+
+The extension uses Vite with several plugins for an optimized development experience.
+
+### Vite Configuration
+
+The build is configured in `vite.config.ts:15-70` with:
+
+```typescript
+export const sharedConfig: UserConfig = {
+  root: r('src'),
+  resolve: {
+    alias: {
+      '~/': `${r('src')}/`,
+    },
+  },
+  plugins: [
+    Vue(),
+    AutoImport({ imports: ['vue', { 'webextension-polyfill': [['*', 'browser']] }] }),
+    Components({ dirs: [r('src/components')] }),
+    Icons(),
+    UnoCSS(),
+  ],
+}
+```
+
+### Vite Plugins
+
+<AccordionGroup>
+  <Accordion title="@vitejs/plugin-vue">
+    Enables Vue 3 single-file component support
+  </Accordion>
+
+  <Accordion title="unplugin-auto-import">
+    Auto-imports Vue APIs (`ref`, `computed`, `watch`) and the webextension-polyfill library. You don't need to manually import these in your components.
+  </Accordion>
+
+  <Accordion title="unplugin-vue-components">
+    Automatically registers components from `src/components/`. Components are available globally without explicit imports.
+  </Accordion>
+
+  <Accordion title="unplugin-icons">
+    On-demand icon imports from popular icon sets
+  </Accordion>
+
+  <Accordion title="unocss">
+    Atomic CSS engine for utility-first styling
+  </Accordion>
+
+  <Accordion title="assets-rewrite (custom)">
+    Rewrites asset paths to use relative URLs in the production build. This ensures assets load correctly in the extension environment.
+  </Accordion>
+</AccordionGroup>
+
+### Build Output
+
+The build process outputs to `extension/dist/` as configured in `vite.config.ts:84`:
+
+```typescript
+build: {
+  outDir: r('extension/dist'),
+  emptyOutDir: false,
+  sourcemap: isDev ? 'inline' : false,
+  rollupOptions: {
+    input: {
+      newtab: r('src/newtab/index.html'),
+    },
+  },
+}
+```
+
+## Extension Manifest
+
+The manifest is dynamically generated in `src/manifest.ts`.
+
+### Manifest Configuration
+
+```typescript
+const manifest: Manifest.WebExtensionManifest = {
+  manifest_version: 3,
+  name: pkg.displayName || pkg.name,
+  version: pkg.version,
+  description: pkg.description,
+  chrome_url_overrides: {
+    newtab: 'dist/newtab/index.html',
+  },
+  permissions: ['storage'],
+  host_permissions: ['https://gist.githubusercontent.com/fuongz/dc7bdaffc9181e7ef0b176f1f025ab22/*'],
+}
+```
+
+### Chrome URL Overrides
+
+The `chrome_url_overrides` field (line 16-18) replaces Chrome's default new tab page:
+
+```typescript
+chrome_url_overrides: {
+  newtab: 'dist/newtab/index.html',
+}
+```
+
+When users open a new tab, Chrome loads `dist/newtab/index.html` instead of the default page.
+
+### Permissions
+
+<ParamField path="storage" type="permission">
+  Required for `chrome.storage.local` API access. The extension stores user preferences (background color, fonts) using this API.
+</ParamField>
+
+<ParamField path="host_permissions" type="permission">
+  Grants access to the GitHub Gist URL that hosts the quotes JSON file
+</ParamField>
+
+## Vue 3 Setup
+
+The extension uses Vue 3 with the Composition API and `<script setup>` syntax.
+
+### Component Structure
+
+The main component (`src/newtab/NewTab.vue:1-265`) uses:
+
+- **Composition API**: All logic is defined in `<script setup>`
+- **Auto-imports**: Vue APIs like `ref`, `computed`, `onMounted` are automatically available
+- **TypeScript**: Full type safety with interfaces and type annotations
+
+```vue
+<script setup lang="ts">
+import { onClickOutside } from '@vueuse/core'
+import useUI from '~/composables/useUI'
+import { useWebExtensionStorage } from '~/composables/useWebExtensionStorage'
+import { fetcher } from '~/logic/fetcher'
+
+interface Config {
+  bgColor: string
+  quoteFontFamily: string
+  authorFontFamily: string
+}
+
+const { data: config, dataReady } = useWebExtensionStorage<Config>(
+  'fuongz_just_random_quote',
+  { bgColor: '#18181b', quoteFontFamily: 'playfair-display', authorFontFamily: 'montserrat' },
+  { mergeDefaults: true }
+)
+</script>
+```
+
+## Asset Handling
+
+Assets are managed through Vite's asset pipeline:
+
+1. **Icons**: Stored in `src/assets/` and referenced in the manifest
+2. **Fonts**: Loaded dynamically from Google Fonts CDN based on user selection
+3. **Relative Paths**: The custom `assets-rewrite` plugin converts absolute paths to relative paths for extension compatibility
+
+<Note>
+  The extension dynamically loads Google Fonts at runtime (NewTab.vue:54-61) rather than bundling them, reducing the extension size.
+</Note>

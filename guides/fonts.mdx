@@ -1,0 +1,111 @@
+---
+title: Font Customization
+description: Choose from 11 Google Fonts to customize the appearance of quotes and author names
+---
+
+Your NewTab extension includes 11 carefully selected Google Fonts. You can independently customize the font for the quote text and the author name.
+
+## Available Fonts
+
+The following Google Fonts are available in the extension:
+
+<Tabs>
+  <Tab title="All Fonts">
+    1. **Playfair Display** - Elegant serif font, great for quotes
+    2. **Space Grotesk** - Modern geometric sans-serif
+    3. **Montserrat** - Clean, versatile sans-serif
+    4. **Proza Libre** - Readable serif font
+    5. **Rubik** - Rounded sans-serif with a friendly feel
+    6. **Roboto** - Google's signature sans-serif
+    7. **Oswald** - Bold, condensed sans-serif
+    8. **DM Sans** - Low-contrast geometric sans-serif
+    9. **Inter** - Highly readable screen-optimized font
+    10. **Numans** - Minimal sans-serif
+    11. **Be Vietnam Pro** - Contemporary sans-serif
+  </Tab>
+  <Tab title="Recommended Combinations">
+    - **Classic**: Playfair Display (quote) + Montserrat (author)
+    - **Modern**: Space Grotesk (quote) + Inter (author)
+    - **Bold**: Oswald (quote) + Roboto (author)
+    - **Elegant**: Proza Libre (quote) + DM Sans (author)
+  </Tab>
+</Tabs>
+
+## Changing the Quote Font
+
+1. Click the **settings icon** in the bottom-left corner
+2. Locate the **Quote font** dropdown
+3. Select your preferred font from the list
+4. The quote text updates immediately (with a brief loading animation)
+
+The quote font is applied to the main inspirational quote text displayed in large text on your new tab page.
+
+```typescript
+// Default quote font
+quoteFontFamily: 'playfair-display'
+```
+
+## Changing the Author Font
+
+1. Click the **settings icon** in the bottom-left corner
+2. Locate the **Author font** dropdown
+3. Select your preferred font from the list
+4. The author name updates immediately (with a brief loading animation)
+
+The author font is applied to the author attribution shown below the quote.
+
+```typescript
+// Default author font
+authorFontFamily: 'montserrat'
+```
+
+## Font Loading Behavior
+
+The extension uses an optimized font loading strategy:
+
+### On-Demand Loading
+
+Fonts are loaded from Google Fonts CDN only when needed. When you select a font:
+
+1. The extension checks if the font is already loaded
+2. If not, it creates a `<link>` tag to load the font from Google Fonts
+3. The font is cached in the browser for future use
+4. A 500ms loading animation displays while the font loads
+
+### Font Weights
+
+Each font includes specific weights optimized for readability:
+
+```typescript
+const fontGoogleMap = {
+  'playfair-display': 'Playfair+Display:wght@500',
+  'space-grotesk': 'Space+Grotesk:wght@400;500',
+  'montserrat': 'Montserrat:wght@400;500;600',
+  'proza-libre': 'Proza+Libre',
+  'rubik': 'Rubik:wght@500',
+  'roboto': 'Roboto',
+  'oswald': 'Oswald:wght@400;500',
+  'dm-sans': 'DM+Sans:wght@400;500',
+  'inter': 'Inter:wght@500',
+  'numans': 'Numans',
+  'be-vietnam-pro': 'Be+Vietnam+Pro:wght@400;500'
+}
+```
+
+### Initial Load
+
+When you first open a new tab:
+
+1. Your saved font preferences load from Chrome Storage
+2. Both the quote and author fonts are loaded
+3. A random quote displays once fonts are ready
+
+<Note>
+  Font changes are applied immediately but may take a moment to download if you're using a new font for the first time. The extension shows a loading skeleton during this brief period.
+</Note>
+
+## Performance Tips
+
+- **Switching fonts**: You can change fonts as many times as you want - already-loaded fonts display instantly
+- **Network**: Fonts load over HTTPS from Google Fonts CDN with `display=swap` for optimal performance
+- **Caching**: Once loaded, fonts are cached by your browser and don't need to be downloaded again

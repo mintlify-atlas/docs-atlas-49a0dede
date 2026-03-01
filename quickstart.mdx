@@ -1,80 +1,223 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quick Start
+description: Get started with Your NewTab and customize your experience
 ---
 
-## Get started in three steps
+# Quick Start
 
-Get your documentation site running locally and make your first customization.
+This guide will help you get Your NewTab up and running, then show you how to customize it to match your personal style.
 
-### Step 1: Set up your local environment
+## First Time Setup
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
+<Steps>
+  <Step title="Install the extension">
+    Follow the [installation guide](/installation) to install Your NewTab from source on Chrome or Firefox.
+  </Step>
+
+  <Step title="Open a new tab">
+    Press `Ctrl+T` (Windows/Linux) or `Cmd+T` (Mac) to open a new tab.
     
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
+    You should see:
+    - A random inspirational quote in large text
+    - The author's name below the quote
+    - A dark zinc background (default: `#18181b`)
+    - A settings icon (gear) in the bottom-left corner
+  </Step>
+
+  <Step title="Explore the quote">
+    Each time you open a new tab, you'll see a different quote. The extension fetches quotes from a curated collection and displays them randomly.
     
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+    Example quotes you might see:
+    - "The only way to do great work is to love what you do." - Steve Jobs
+    - "Innovation distinguishes between a leader and a follower." - Steve Jobs
+    - "Life is what happens when you're busy making other plans." - John Lennon
+  </Step>
+</Steps>
 
-### Step 2: Deploy your changes
+## Customizing Your Experience
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+Your NewTab stores all customization preferences using the Chrome Storage API, so your settings persist across browser sessions.
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+### Opening Settings
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 3: Go live
-
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
-
-## Next steps
-
-Now that you have your docs running, explore these key features:
-
-<CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
-</CardGroup>
+Click the settings icon (⚙️) in the bottom-left corner to open the settings panel. The icon rotates 90° when the panel is open.
 
 <Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
+  Click outside the settings panel or click the icon again to close it.
 </Note>
+
+### Changing Background Color
+
+The settings panel offers 6 preset colors plus a custom color picker:
+
+<Steps>
+  <Step title="Choose a preset color">
+    Click any of the 6 preset color boxes:
+    - White (`#fff`)
+    - Zinc Dark (`#18181b`) - default
+    - Blue (`#1e3a8a`)
+    - Indigo (`#312e81`)
+    - Green (`#166534`)
+    - Red (`#7f1d1d`)
+    
+    The background changes immediately, and the text color automatically adjusts for optimal contrast.
+  </Step>
+
+  <Step title="Use custom color (Optional)">
+    For any other color:
+    
+    1. Click the color box with the "+" icon (or your current custom color)
+    2. A color picker opens
+    3. Select any color you want
+    4. The background updates in real-time as you adjust the color
+    
+    Your custom color is saved and will appear in that box for future adjustments.
+  </Step>
+</Steps>
+
+**How it works**: The extension uses a smart algorithm to determine if your background is light or dark:
+
+```typescript
+// From src/composables/useUI.ts:16
+const lightOrDark = (color: string) => {
+  // ... color parsing logic
+  // HSP (Highly Sensitive Poo) equation
+  hsp = Math.sqrt(0.299 * (r * r) + 0.587 * (g * g) + 0.114 * (b * b))
+  
+  if (hsp > 127.5) return 'light'
+  else return 'dark'
+}
+```
+
+This ensures your quote text is always readable, regardless of background color.
+
+### Customizing Fonts
+
+You can independently customize the font for both the quote text and the author name.
+
+<Steps>
+  <Step title="Change quote font">
+    In the settings panel, find the **Quote font** dropdown and select from 11 Google Fonts:
+    
+    - Playfair Display (default) - elegant serif
+    - Space Grotesk - modern geometric
+    - Montserrat - clean sans-serif
+    - Proza Libre - readable serif
+    - Rubik - rounded sans-serif
+    - Roboto - classic sans-serif
+    - Oswald - condensed bold
+    - DM Sans - contemporary sans
+    - Inter - interface-optimized
+    - Numans - neutral sans
+    - Be Vietnam Pro - Vietnamese-optimized
+    
+    The quote will briefly show a loading state while the new font loads from Google Fonts.
+  </Step>
+
+  <Step title="Change author font">
+    Similarly, use the **Author font** dropdown to change the author name font. You can use the same font as the quote or choose a different one for contrast.
+  </Step>
+</Steps>
+
+**How it works**: Fonts are dynamically loaded from Google Fonts CDN only when selected:
+
+```typescript
+// From src/newtab/NewTab.vue:54
+function loadFont(fontValue: string) {
+  if (loadedFonts.has(fontValue) || !fontGoogleMap[fontValue]) return
+  loadedFonts.add(fontValue)
+  const link = document.createElement('link')
+  link.rel = 'stylesheet'
+  link.href = `https://fonts.googleapis.com/css2?family=${fontGoogleMap[fontValue]}&display=swap`
+  document.head.appendChild(link)
+}
+```
+
+This approach:
+- Only loads fonts you actually use
+- Caches loaded fonts for better performance
+- Prevents duplicate font loads
+
+### Settings Storage
+
+All your preferences are automatically saved to Chrome's local storage:
+
+```typescript
+// From src/newtab/NewTab.vue:16
+const { data: config, dataReady } = useWebExtensionStorage<Config>(
+  'fuongz_just_random_quote',
+  {
+    bgColor: '#18181b',
+    quoteFontFamily: 'playfair-display',
+    authorFontFamily: 'montserrat',
+  },
+  { mergeDefaults: true }
+)
+```
+
+This means:
+- Your settings persist across browser restarts
+- Settings sync automatically if you use Chrome Sync
+- Default values are merged with saved settings
+- Changes are saved immediately when you adjust any setting
+
+## Example Customizations
+
+Here are some popular style combinations:
+
+**Minimal White**
+- Background: White (`#fff`)
+- Quote Font: Inter
+- Author Font: DM Sans
+
+**Dark & Elegant**
+- Background: Zinc Dark (`#18181b`) - default
+- Quote Font: Playfair Display
+- Author Font: Montserrat
+
+**Bold & Modern**
+- Background: Blue (`#1e3a8a`)
+- Quote Font: Space Grotesk
+- Author Font: Oswald
+
+**Warm & Cozy**
+- Background: Custom (`#2d1b1b`)
+- Quote Font: Proza Libre
+- Author Font: Be Vietnam Pro
+
+## Advanced Tips
+
+**Reset to defaults**
+
+To reset all settings to defaults:
+1. Open Chrome DevTools (`F12`)
+2. Go to Application → Storage → Local Storage
+3. Find the key `fuongz_just_random_quote`
+4. Delete it
+5. Refresh the tab
+
+**Inspect quote data**
+
+The quotes are fetched from:
+```
+https://gist.githubusercontent.com/fuongz/dc7bdaffc9181e7ef0b176f1f025ab22/raw/0d62f619d5ff9457e8e9f710c9fdefd463a0ee7c/quotes.json
+```
+
+You can view the raw JSON to see all available quotes.
+
+**Disable scrolling**
+
+The extension automatically disables scrolling on the new tab page to maintain a clean, fixed layout. This is handled by `useUI.ts:48` in the `onMounted` hook.
+
+## Next Steps
+
+You're all set! Every new tab will now display inspirational quotes with your custom styling.
+
+<CardGroup cols={2}>
+  <Card title="View Source Code" icon="github" href="https://github.com/fuongz/newtab">
+    Explore the implementation or contribute to the project
+  </Card>
+  <Card title="Report Issues" icon="bug" href="https://github.com/fuongz/newtab/issues">
+    Found a bug or have a feature request? Let us know
+  </Card>
+</CardGroup>

@@ -1,0 +1,162 @@
+---
+title: Building for Production
+description: Build and package Your NewTab extension for distribution
+---
+
+Build the Your NewTab extension for production deployment to Chrome Web Store or Firefox Add-ons.
+
+## Build the Extension
+
+To create a production build:
+
+```bash
+bun run build
+```
+
+This command performs the following steps:
+
+1. **Clears previous builds** - Removes old `extension/dist` files and manifests
+2. **Builds with Vite** - Compiles Vue components, TypeScript, and styles
+3. **Generates manifest** - Creates the appropriate `manifest.json` for the target browser
+
+<Info>
+The build process uses Vite with production optimizations including minification, tree-shaking, and code splitting.
+</Info>
+
+## Build Output
+
+After building, you'll find the compiled extension in:
+
+```
+extension/
+├── dist/
+│   └── newtab/
+│       ├── index.html
+│       └── assets/
+│           ├── *.js
+│           └── *.css
+└── manifest.json
+```
+
+### What Gets Generated
+
+- **`extension/dist/newtab/`** - Compiled new tab page with optimized assets
+- **`extension/manifest.json`** - Browser extension manifest file
+- **Minified JavaScript** - Optimized and bundled JS files
+- **Optimized CSS** - UnoCSS utilities compiled and minified
+
+## Packaging for Distribution
+
+After building, you can package the extension into distributable formats:
+
+```bash
+bun run pack
+```
+
+This creates all three distribution formats:
+
+<CardGroup cols={3}>
+  <Card title="ZIP" icon="file-zipper">
+    `extension.zip` for Chrome Web Store
+  </Card>
+  <Card title="CRX" icon="chrome">
+    `extension.crx` for Chrome manual installation
+  </Card>
+  <Card title="XPI" icon="firefox">
+    `extension.xpi` for Firefox Add-ons
+  </Card>
+</CardGroup>
+
+### Individual Package Commands
+
+You can also create specific package formats:
+
+<CodeGroup>
+```bash ZIP (Chrome Web Store)
+bun run pack:zip
+```
+
+```bash CRX (Chrome)
+bun run pack:crx
+```
+
+```bash XPI (Firefox)
+bun run pack:xpi
+```
+</CodeGroup>
+
+## Testing the Production Build
+
+Before distributing, test the production build locally:
+
+<Steps>
+  <Step title="Build the extension">
+    ```bash
+    bun run build
+    ```
+  </Step>
+
+  <Step title="Load in browser">
+    ### Chrome
+    1. Go to `chrome://extensions`
+    2. Enable **Developer mode**
+    3. Click **Load unpacked**
+    4. Select the `extension/` folder
+    
+    ### Firefox
+    1. Go to `about:debugging#/runtime/this-firefox`
+    2. Click **Load Temporary Add-on**
+    3. Select `extension/manifest.json`
+  </Step>
+
+  <Step title="Test functionality">
+    - Open new tabs and verify quotes display correctly
+    - Check that all UI elements render properly
+    - Verify there are no console errors
+    - Test on different screen sizes
+  </Step>
+</Steps>
+
+<Warning>
+Always test the production build before submitting to extension stores. The production build may behave differently than the development version.
+</Warning>
+
+## Build Configuration
+
+The build process is configured in `vite.config.ts`:
+
+- **Output directory**: `extension/dist`
+- **Source maps**: Disabled in production, inline in development
+- **Asset optimization**: Relative paths for cross-browser compatibility
+- **Auto-imports**: Vue Composition API and WebExtension APIs
+
+## Troubleshooting
+
+### Build fails with TypeScript errors
+
+Run type checking to identify issues:
+
+```bash
+bun run typecheck
+```
+
+### Assets not loading
+
+Ensure you've built the extension before packing:
+
+```bash
+bun run build && bun run pack:zip
+```
+
+### Package size too large
+
+Check that you're not including unnecessary files. The `.gitignore` and build process should exclude:
+- `node_modules/`
+- Source TypeScript files (`.ts`)
+- Development configuration files
+
+## Next Steps
+
+<Card title="Release Process" icon="rocket" href="/development/release">
+  Learn how to create releases with automated version bumping and git tagging
+</Card>

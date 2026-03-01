@@ -1,0 +1,185 @@
+---
+title: 'Deploy to Firefox Add-ons'
+description: 'Publish your NewTab extension to the Firefox Add-ons marketplace'
+icon: 'firefox'
+---
+
+This guide walks you through publishing your NewTab extension to Firefox Add-ons (AMO).
+
+## Prerequisites
+
+Before you can publish to Firefox Add-ons, you need:
+
+- A [Firefox Add-ons account](https://addons.mozilla.org)
+- A Firefox account (free, no registration fee)
+
+<Info>
+Unlike Chrome Web Store, Firefox Add-ons does not require a registration fee. Account creation is free.
+</Info>
+
+## Build and test for Firefox
+
+Firefox extensions use the same codebase but need to be tested in Firefox before deployment.
+
+<Steps>
+  <Step title="Test in Firefox during development">
+    To develop and test in Firefox, use:
+
+    ```bash
+    bun run dev-firefox
+    ```
+
+    This builds the extension with Firefox-specific configuration and starts the development server.
+
+    You can also run the extension directly in Firefox:
+
+    ```bash
+    bun run start:firefox
+    ```
+  </Step>
+
+  <Step title="Build for production">
+    Build the extension for production:
+
+    ```bash
+    bun run build
+    ```
+
+    This creates optimized files in the `extension/` directory.
+  </Step>
+
+  <Step title="Create XPI package">
+    Package the extension into an XPI file (Firefox's extension format):
+
+    ```bash
+    bun run pack:xpi
+    ```
+
+    This creates `extension.xpi` in your project root, which is ready for upload to Firefox Add-ons.
+  </Step>
+</Steps>
+
+<Tip>
+You can create all package formats at once (ZIP for Chrome, CRX, and XPI for Firefox) with:
+
+```bash
+bun run pack
+```
+
+Or use the automated release script:
+
+```bash
+bun run release          # patch bump: 0.0.7 → 0.0.8
+bun run release:minor    # minor bump: 0.0.7 → 0.1.0
+bun run release:major    # major bump: 0.0.7 → 1.0.0
+```
+</Tip>
+
+## Upload to Firefox Add-ons
+
+<Steps>
+  <Step title="Access the Developer Hub">
+    Go to [addons.mozilla.org](https://addons.mozilla.org) and sign in with your Firefox account.
+
+    Navigate to **Tools** → **Submit a New Add-on**.
+  </Step>
+
+  <Step title="Upload your XPI file">
+    Click **Select a file** and upload the `extension.xpi` file you created.
+
+    Firefox will automatically validate your extension. Wait for the validation to complete.
+  </Step>
+
+  <Step title="Choose distribution channel">
+    Select how you want to distribute your extension:
+
+    - **On this site**: Publicly listed on Firefox Add-ons (recommended for most extensions)
+    - **On your own**: Self-distributed, signed by Mozilla but not listed
+  </Step>
+
+  <Step title="Fill out add-on details">
+    Complete all required fields:
+
+    - **Name**: Your NewTab
+    - **Summary**: Short description (up to 250 characters)
+    - **Description**: Detailed description of your extension
+    - **Categories**: Select up to two categories (e.g., "Tabs" and "Appearance")
+    - **Support email**: Contact email for user support
+    - **Support website**: Optional support site URL
+    - **License**: Choose an appropriate license
+    - **Privacy policy**: Required if your extension collects any user data
+    - **Icon**: Upload your extension icon (minimum 64x64px, recommended 128x128px)
+    - **Screenshots**: Upload at least one screenshot
+  </Step>
+
+  <Step title="Submit for review">
+    Review your listing details and click **Submit Version**.
+
+    Your extension will enter Mozilla's review queue.
+  </Step>
+</Steps>
+
+## Review process
+
+Firefox has a more thorough review process than Chrome:
+
+<Steps>
+  <Step title="Automated validation">
+    Your extension is immediately scanned for common issues, security problems, and policy violations.
+  </Step>
+
+  <Step title="Manual review">
+    A human reviewer examines your code and listing. This can take anywhere from a few hours to several weeks, depending on:
+
+    - Complexity of your extension
+    - Current review queue length
+    - Whether your extension uses risky permissions
+  </Step>
+
+  <Step title="Publication or rejection">
+    - If approved, your extension is published immediately
+    - If rejected, you'll receive detailed feedback on what needs to be fixed
+  </Step>
+</Steps>
+
+<Warning>
+Firefox reviewers manually examine your source code. Make sure your extension:
+
+- Follows [Firefox Add-on Policies](https://extensionworkshop.com/documentation/publish/add-on-policies/)
+- Doesn't use minified or obfuscated code without explanation
+- Has clear, accurate descriptions
+- Only requests necessary permissions
+</Warning>
+
+## Key differences from Chrome
+
+Be aware of these differences when publishing to Firefox:
+
+| Aspect | Chrome Web Store | Firefox Add-ons |
+|--------|------------------|------------------|
+| **Registration fee** | $5 one-time | Free |
+| **Review time** | 1-7 days | Hours to weeks |
+| **Review depth** | Automated + light manual | Thorough manual code review |
+| **Package format** | ZIP | XPI |
+| **Update speed** | Automatic after approval | Same review process |
+| **Source code** | Not required | May be requested |
+
+<Note>
+For extensions with complex build processes (like this one using Vite and TypeScript), Mozilla may request access to your source code to verify the build. Keep your repository accessible or be prepared to provide source files.
+</Note>
+
+## Update an existing extension
+
+To update an already published extension:
+
+1. Increment the version in `package.json`
+2. Build and pack: `bun run build && bun run pack:xpi`
+3. Go to your extension's page on the Developer Hub
+4. Click **Upload New Version**
+5. Upload the new `extension.xpi`
+6. Update release notes
+7. Submit for review
+
+<Info>
+Users with your extension installed will automatically receive the update once it's approved and published.
+</Info>

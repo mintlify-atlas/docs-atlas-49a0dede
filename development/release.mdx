@@ -1,0 +1,264 @@
+---
+title: Release Process
+description: Create and publish new versions of Your NewTab extension
+---
+
+The release process for Your NewTab is automated with scripts that handle version bumping, building, packaging, and git tagging.
+
+## Release Commands
+
+Your NewTab includes three release commands for different version bump types:
+
+<CodeGroup>
+```bash Patch (0.0.7 → 0.0.8)
+bun run release
+```
+
+```bash Minor (0.0.7 → 0.1.0)
+bun run release:minor
+```
+
+```bash Major (0.0.7 → 1.0.0)
+bun run release:major
+```
+</CodeGroup>
+
+<Info>
+The default `bun run release` command performs a **patch** version bump. Use this for bug fixes and small updates.
+</Info>
+
+## What the Release Script Does
+
+When you run a release command, the following steps are executed automatically:
+
+<Steps>
+  <Step title="Version bump">
+    Updates the version number in `package.json` according to the specified bump type:
+    
+    - **Patch**: Increments the last digit (bug fixes)
+    - **Minor**: Increments the middle digit, resets patch to 0 (new features)
+    - **Major**: Increments the first digit, resets minor and patch to 0 (breaking changes)
+  </Step>
+
+  <Step title="Build the extension">
+    Runs `bun run build` to create a production build:
+    
+    - Clears previous builds
+    - Compiles Vue components and TypeScript
+    - Generates optimized assets
+    - Creates browser manifest
+  </Step>
+
+  <Step title="Pack distribution files">
+    Runs `bun run pack` to create all distribution formats:
+    
+    - `extension.zip` - For Chrome Web Store
+    - `extension.crx` - For Chrome manual installation
+    - `extension.xpi` - For Firefox Add-ons
+  </Step>
+
+  <Step title="Git commit and tag">
+    Creates a git commit and tag:
+    
+    - Stages `package.json` changes
+    - Commits with message: `chore: bump version to v{version}`
+    - Creates a git tag: `v{version}`
+  </Step>
+
+  <Step title="Push to remote">
+    Pushes the commit and tag to the origin repository:
+    
+    - Pushes to `main` branch
+    - Pushes the version tag
+  </Step>
+</Steps>
+
+## Version Bump Guidelines
+
+Follow [Semantic Versioning](https://semver.org/) principles:
+
+<AccordionGroup>
+  <Accordion title="Patch Release (0.0.X)">
+    Use for:
+    - Bug fixes
+    - Performance improvements
+    - Documentation updates
+    - Minor UI tweaks
+    
+    ```bash
+    bun run release
+    ```
+  </Accordion>
+
+  <Accordion title="Minor Release (0.X.0)">
+    Use for:
+    - New features
+    - New quote categories
+    - UI enhancements
+    - Non-breaking API changes
+    
+    ```bash
+    bun run release:minor
+    ```
+  </Accordion>
+
+  <Accordion title="Major Release (X.0.0)">
+    Use for:
+    - Breaking changes
+    - Major redesigns
+    - Significant architectural changes
+    - Removal of features
+    
+    ```bash
+    bun run release:major
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Pre-Release Checklist
+
+Before running a release command:
+
+<Steps>
+  <Step title="Ensure clean working directory">
+    ```bash
+    git status
+    ```
+    
+    Commit or stash any uncommitted changes.
+  </Step>
+
+  <Step title="Pull latest changes">
+    ```bash
+    git pull origin main
+    ```
+  </Step>
+
+  <Step title="Run tests">
+    ```bash
+    bun run test
+    bun run typecheck
+    bun run lint
+    ```
+  </Step>
+
+  <Step title="Test locally">
+    Build and test the extension manually:
+    
+    ```bash
+    bun run build
+    ```
+    
+    Load the `extension/` folder in your browser and verify functionality.
+  </Step>
+</Steps>
+
+<Warning>
+The release script automatically pushes to the `main` branch and creates a remote tag. Ensure you have the correct permissions and are on the right branch before releasing.
+</Warning>
+
+## Manual Release Steps
+
+If you prefer to release manually or need to troubleshoot:
+
+<Steps>
+  <Step title="Update version manually">
+    Edit the version in `package.json`:
+    
+    ```json
+    {
+      "version": "1.0.1"
+    }
+    ```
+  </Step>
+
+  <Step title="Build and pack">
+    ```bash
+    bun run build
+    bun run pack
+    ```
+  </Step>
+
+  <Step title="Commit and tag">
+    ```bash
+    git add package.json
+    git commit -m "chore: bump version to v1.0.1"
+    git tag v1.0.1
+    ```
+  </Step>
+
+  <Step title="Push to remote">
+    ```bash
+    git push origin main
+    git push origin v1.0.1
+    ```
+  </Step>
+</Steps>
+
+## Publishing to Extension Stores
+
+After creating a release, upload the distribution files to extension stores:
+
+### Chrome Web Store
+
+1. Go to [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole)
+2. Select your extension
+3. Click **Package** → **Upload new package**
+4. Upload `extension.zip`
+5. Fill in any required metadata
+6. Click **Submit for review**
+
+### Firefox Add-ons
+
+1. Go to [Firefox Add-on Developer Hub](https://addons.mozilla.org/developers/)
+2. Select your extension
+3. Click **Upload New Version**
+4. Upload `extension.xpi`
+5. Complete the submission form
+6. Submit for review
+
+<Note>
+Review times vary by platform. Chrome Web Store typically reviews within a few hours to days, while Firefox can take a few days to a week.
+</Note>
+
+## Release Script Source
+
+The release automation is implemented in `scripts/release.ts`. It:
+
+- Validates the bump type argument
+- Reads and updates `package.json`
+- Executes build and pack commands
+- Creates git commits and tags
+- Pushes to the remote repository
+
+You can customize the release process by modifying this script.
+
+## Troubleshooting
+
+### Git push fails
+
+Ensure you have push permissions to the repository and are authenticated:
+
+```bash
+git remote -v
+```
+
+### Build fails during release
+
+The release script will stop if the build fails. Fix any build errors before releasing:
+
+```bash
+bun run typecheck
+bun run lint
+```
+
+### Tag already exists
+
+If a version tag already exists, delete it first:
+
+```bash
+git tag -d v1.0.1
+git push origin :refs/tags/v1.0.1
+```
+
+Then run the release command again.

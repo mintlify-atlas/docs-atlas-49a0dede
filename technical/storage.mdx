@@ -1,0 +1,246 @@
+---
+title: Storage
+description: Browser extension storage API wrapper with Vue reactivity
+---
+
+The `useWebExtensionStorage` composable provides a reactive interface to the Chrome Storage API, making it easy to persist and sync user settings.
+
+## Overview
+
+This composable wraps the `chrome.storage.local` API with Vue's reactivity system. Any changes to the returned `data` ref automatically save to storage, and changes from other tabs or extension contexts are synced back.
+
+## Usage Example
+
+From `src/newtab/NewTab.vue:16-20`:
+
+```typescript
+interface Config {
+  bgColor: string
+  quoteFontFamily: string
+  authorFontFamily: string
+}
+
+const { data: config, dataReady } = useWebExtensionStorage<Config>(
+  'fuongz_just_random_quote',
+  {
+    bgColor: '#18181b',
+    quoteFontFamily: 'playfair-display',
+    authorFontFamily: 'montserrat',
+  },
+  { mergeDefaults: true }
+)
+
+// Wait for storage to load
+await dataReady
+
+// Update storage (automatically saves)
+config.value = { ...config.value, bgColor: '#1e3a8a' }
+```
+
+## API Reference
+
+### Function Signature
+
+```typescript
+function useWebExtensionStorage<T>(
+  key: string,
+  initialValue: MaybeRefOrGetter<T>,
+  options?: WebExtensionStorageOptions<T>
+): { data: RemovableRef<T>, dataReady: Promise<T> }
+```
+
+### Parameters
+
+<ParamField path="key" type="string" required>
+  Storage key used in `chrome.storage.local`. Must be unique per stored value.
+</ParamField>
+
+<ParamField path="initialValue" type="T | Ref<T> | () => T" required>
+  Default value when no stored data exists. Can be a plain value, ref, or getter function.
+</ParamField>
+
+<ParamField path="options" type="WebExtensionStorageOptions<T>">
+  Configuration options for storage behavior
+</ParamField>
+
+### Options
+
+<ParamField path="options.mergeDefaults" type="boolean | function" default="false">
+  When `true`, merges stored values with `initialValue` using object spread. Useful for adding new properties to existing configs.
+  
+  Can also be a custom merge function: `(storedValue: T, defaults: T) => T`
+</ParamField>
+
+<ParamField path="options.writeDefaults" type="boolean" default="true">
+  Writes `initialValue` to storage if no value exists
+</ParamField>
+
+<ParamField path="options.deep" type="boolean" default="true">
+  Enables deep watching of nested object properties
+</ParamField>
+
+<ParamField path="options.flush" type="'pre' | 'post' | 'sync'" default="'pre'">
+  Controls when the watcher callback runs relative to component rendering
+</ParamField>
+
+<ParamField path="options.shallow" type="boolean" default="false">
+  Uses `shallowRef` instead of `ref` for performance when deep reactivity isn't needed
+</ParamField>
+
+<ParamField path="options.listenToStorageChanges" type="boolean" default="true">
+  Listens for changes from other extension contexts and syncs them to `data`
+</ParamField>
+
+<ParamField path="options.serializer" type="Serializer<T>">
+  Custom serializer for storage read/write. Defaults to auto-detected serializer based on `initialValue` type.
+</ParamField>
+
+<ParamField path="options.onError" type="(error: unknown) => void">
+  Error handler for storage operations. Defaults to `console.error`
+</ParamField>
+
+### Return Value
+
+<ResponseField name="data" type="RemovableRef<T>">
+  Reactive reference to the stored value. Assign to this ref to update storage.
+  
+  Setting to `null` removes the item from storage.
+</ResponseField>
+
+<ResponseField name="dataReady" type="Promise<T>">
+  Promise that resolves when the initial storage read completes. Always await this before using `data.value`.
+</ResponseField>
+
+## How It Works
+
+### Storage Interface
+
+The composable implements a `StorageLikeAsync` interface (lines 31-44) that wraps the Chrome Storage API:
+
+```typescript
+const storageInterface: StorageLikeAsync = {
+  removeItem(key: string) {
+    return storage.local.remove(key)
+  },
+
+  setItem(key: string, value: string) {
+    return storage.local.set({ [key]: value })
+  },
+
+  async getItem(key: string) {
+    const storedData = await storage.local.get(key)
+    return storedData[key] as string
+  },
+}
+```
+
+### Serialization
+
+Values are automatically serialized based on type (lines 11-29):
+
+<Tabs>
+  <Tab title="Object">
+    JSON serialization for plain objects
+  </Tab>
+  <Tab title="Array">
+    JSON serialization
+  </Tab>
+  <Tab title="Set">
+    Custom Set serializer
+  </Tab>
+  <Tab title="Map">
+    Custom Map serializer
+  </Tab>
+  <Tab title="Date">
+    ISO string serialization
+  </Tab>
+  <Tab title="Primitives">
+    Boolean, string, number handled natively
+  </Tab>
+</Tabs>
+
+### Merge Behavior
+
+When `mergeDefaults: true`, the composable merges stored data with defaults (lines 79-85):
+
+```typescript
+if (mergeDefaults) {
+  const value = await serializer.read(rawValue) as T
+  if (typeof mergeDefaults === 'function')
+    data.value = mergeDefaults(value, rawInit)
+  else if (type === 'object' && !Array.isArray(value))
+    data.value = { ...(rawInit as Record<keyof unknown, unknown>), ...(value as Record<keyof unknown, unknown>) } as T
+  else data.value = value
+}
+```
+
+This ensures new properties in `initialValue` are added to existing stored configs.
+
+### Reactivity
+
+A Vue watcher (lines 113-117) automatically saves changes:
+
+```typescript
+const { pause: pauseWatch, resume: resumeWatch } = watch(
+  data,
+  write,
+  { flush, deep },
+)
+```
+
+### Cross-Context Sync
+
+The composable listens to storage changes from other contexts (lines 119-140):
+
+```typescript
+if (listenToStorageChanges) {
+  const listener = async (changes: Record<string, Storage.StorageChange>) => {
+    try {
+      pauseWatch()
+      for (const [changeKey, change] of Object.entries(changes)) {
+        await read({
+          key: changeKey,
+          newValue: change.newValue as string | null,
+        })
+      }
+    }
+    finally {
+      resumeWatch()
+    }
+  }
+
+  storage.onChanged.addListener(listener)
+}
+```
+
+The watcher is paused during sync to prevent write loops.
+
+## Real-World Example
+
+Updating a single property in `NewTab.vue:110`:
+
+```typescript
+function handleUpdateSetting(key: keyof Config, value: string) {
+  config.value = { ...config.value, [key]: value }
+}
+```
+
+This triggers:
+1. The watch callback runs
+2. The new value is serialized
+3. `chrome.storage.local.set()` is called
+4. Other open tabs receive the change via `onChanged` listener
+
+<Note>
+  Always await `dataReady` before reading `data.value` to ensure the initial storage read has completed.
+</Note>
+
+## Type Safety
+
+The composable is fully typed with TypeScript:
+
+```typescript
+export type WebExtensionStorageOptions<T> = UseStorageAsyncOptions<T>
+```
+
+This provides autocomplete for options and ensures type safety for stored values.

@@ -1,0 +1,109 @@
+---
+title: Introduction
+description: A minimal browser extension that replaces your new tab with random inspirational quotes
+---
+
+# Your NewTab
+
+Your NewTab is a Chrome and Firefox browser extension that transforms every new tab into a moment of inspiration. Each time you open a new tab, you're greeted with a carefully curated random quote displayed in a beautiful, distraction-free interface.
+
+<CardGroup cols={2}>
+  <Card title="Installation" icon="download" href="/installation">
+    Get started by installing the extension on Chrome or Firefox
+  </Card>
+  <Card title="Quick Start" icon="rocket" href="/quickstart">
+    Learn how to customize your new tab experience
+  </Card>
+  <Card title="Customization" icon="palette" href="/guides/customization">
+    Personalize colors and fonts to match your style
+  </Card>
+  <Card title="GitHub Repository" icon="github" href="https://github.com/fuongz/newtab">
+    View source code and contribute to the project
+  </Card>
+</CardGroup>
+
+## Key Features
+
+**Random Inspirational Quotes**
+
+Each new tab displays a random quote from a curated collection, providing fresh motivation throughout your day.
+
+**Customizable Background Colors**
+
+Choose from 6 preset colors or use the color picker to select any color that matches your mood:
+
+- White (`#fff`)
+- Zinc Dark (`#18181b`)
+- Blue (`#1e3a8a`)
+- Indigo (`#312e81`)
+- Green (`#166534`)
+- Red (`#7f1d1d`)
+- Custom color via color picker
+
+**Multiple Google Fonts**
+
+Customize both quote and author fonts independently from 11 beautiful typefaces:
+
+- Playfair Display
+- Space Grotesk
+- Montserrat
+- Proza Libre
+- Rubik
+- Roboto
+- Oswald
+- DM Sans
+- Inter
+- Numans
+- Be Vietnam Pro
+
+**Persistent Settings**
+
+Your customization preferences are automatically saved using the Chrome Storage API and persist across browser sessions.
+
+**Minimal & Elegant UI**
+
+A clean, distraction-free interface puts the focus on the quotes. The settings panel is tucked away in a corner, accessible only when you need it.
+
+**Smart Color Contrast**
+
+The extension automatically adjusts text color (light or dark) based on your background color choice for optimal readability.
+
+## How It Works
+
+The extension is built with modern web technologies:
+
+- **Vue 3** for reactive UI components
+- **TypeScript** for type safety
+- **UnoCSS** for utility-first styling
+- **Vite** for fast development and optimized builds
+- **WebExtension Polyfill** for cross-browser compatibility
+
+When you open a new tab, the extension:
+
+1. Loads your saved preferences from Chrome Storage
+2. Fetches a random quote from the quotes collection
+3. Dynamically loads the selected Google Fonts
+4. Renders the quote with your chosen styling
+
+## Source Code
+
+The extension is open source and available on GitHub:
+
+[https://github.com/fuongz/newtab](https://github.com/fuongz/newtab)
+
+Key source files:
+
+- `src/newtab/NewTab.vue:1` - Main component with quote display and settings
+- `src/composables/useWebExtensionStorage.ts:46` - Storage hook for persistent settings
+- `src/manifest.ts:6` - Extension manifest configuration
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Install the Extension" icon="download" href="/installation">
+    Follow the installation guide for Chrome or Firefox
+  </Card>
+  <Card title="Customize Your Experience" icon="rocket" href="/quickstart">
+    Learn how to personalize colors and fonts
+  </Card>
+</CardGroup>

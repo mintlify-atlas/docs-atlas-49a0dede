@@ -1,0 +1,187 @@
+---
+title: Installation
+description: Install Your NewTab extension on Chrome or Firefox
+---
+
+# Installation
+
+Your NewTab can be installed from source on Chrome, Chromium-based browsers, and Firefox. Follow the instructions below for your browser.
+
+## System Requirements
+
+- Chrome 88+ or Firefox 78+ (or any Chromium-based browser)
+- Approximately 1 MB of disk space
+- Internet connection for loading quotes and Google Fonts
+
+## Installing from Source
+
+<Note>
+  The extension requires building from source as it's not yet published to the Chrome Web Store or Firefox Add-ons.
+</Note>
+
+<Steps>
+  <Step title="Clone the repository">
+    Clone the source code from GitHub:
+    
+    ```bash
+    git clone https://github.com/fuongz/newtab.git
+    cd newtab
+    ```
+  </Step>
+
+  <Step title="Install dependencies">
+    Install the required packages using Bun (or npm/pnpm):
+    
+    ```bash
+    bun install
+    ```
+    
+    <Note>
+      If you don't have Bun installed, you can use `npm install` or `pnpm install` instead.
+    </Note>
+  </Step>
+
+  <Step title="Build the extension">
+    Build the extension for production:
+    
+    ```bash
+    bun run build
+    ```
+    
+    This command:
+    - Compiles TypeScript to JavaScript
+    - Bundles Vue components
+    - Generates the `extension/` folder with all assets
+    - Creates the manifest.json file
+    
+    The build output will be in the `extension/` directory.
+  </Step>
+
+  <Step title="Load in Chrome/Chromium">
+    For Chrome, Edge, Brave, or other Chromium-based browsers:
+    
+    1. Open your browser and navigate to the extensions page:
+       - Chrome: `chrome://extensions`
+       - Edge: `edge://extensions`
+       - Brave: `brave://extensions`
+    
+    2. Enable **Developer mode** using the toggle in the top-right corner
+    
+    3. Click **Load unpacked**
+    
+    4. Select the `extension/` folder from the project directory
+    
+    The extension icon should appear in your extensions toolbar.
+  </Step>
+
+  <Step title="Load in Firefox (Alternative)">
+    For Firefox:
+    
+    1. Open Firefox and navigate to `about:debugging#/runtime/this-firefox`
+    
+    2. Click **Load Temporary Add-on**
+    
+    3. Navigate to the `extension/` folder and select the `manifest.json` file
+    
+    <Warning>
+      Temporary add-ons in Firefox are removed when you restart the browser. For permanent installation, you'll need to package and sign the extension.
+    </Warning>
+  </Step>
+</Steps>
+
+## Development Mode
+
+If you want to develop or modify the extension:
+
+<Steps>
+  <Step title="Start development server">
+    Run the development command:
+    
+    ```bash
+    bun run dev
+    ```
+    
+    For Firefox:
+    
+    ```bash
+    bun run dev-firefox
+    ```
+    
+    This starts Vite with hot module reloading.
+  </Step>
+
+  <Step title="Load in browser">
+    Follow the same steps as above to load the `extension/` folder in your browser. The extension will automatically reload when you make changes to the source code.
+  </Step>
+</Steps>
+
+## Verification
+
+After installation, verify the extension is working:
+
+<Steps>
+  <Step title="Open a new tab">
+    Press `Ctrl+T` (Windows/Linux) or `Cmd+T` (Mac) to open a new tab.
+  </Step>
+
+  <Step title="Check for quotes">
+    You should see a random inspirational quote displayed with:
+    - Quote text in large font
+    - Author name below the quote
+    - Dark background (default: `#18181b`)
+    - Settings icon in the bottom-left corner
+  </Step>
+
+  <Step title="Test settings">
+    Click the settings icon (gear) in the bottom-left corner. You should see a settings panel with options for:
+    - Background Color (6 presets + custom color picker)
+    - Quote Font (dropdown with 11 font options)
+    - Author Font (dropdown with 11 font options)
+  </Step>
+</Steps>
+
+## Permissions
+
+The extension requires minimal permissions:
+
+```json
+"permissions": ["storage"],
+"host_permissions": [
+  "https://gist.githubusercontent.com/fuongz/dc7bdaffc9181e7ef0b176f1f025ab22/*"
+]
+```
+
+- **storage**: To save your customization preferences locally
+- **host_permissions**: To fetch the quotes JSON file from GitHub Gist
+
+## Troubleshooting
+
+**Extension doesn't appear after loading**
+
+Make sure you selected the `extension/` folder (not the root project folder) when loading the extension.
+
+**No quotes are displayed**
+
+Check your internet connection. The extension fetches quotes from:
+```
+https://gist.githubusercontent.com/fuongz/dc7bdaffc9181e7ef0b176f1f025ab22/raw/0d62f619d5ff9457e8e9f710c9fdefd463a0ee7c/quotes.json
+```
+
+**Fonts not loading**
+
+The extension loads fonts from Google Fonts CDN. Ensure you have internet access and no firewall/ad blocker is blocking:
+```
+https://fonts.googleapis.com/css2?family=...
+```
+
+**Settings not saving**
+
+Make sure the extension has the `storage` permission. Check in:
+- Chrome: `chrome://extensions` → Details → Permissions
+- Firefox: `about:addons` → Extensions → Your NewTab → Permissions
+
+## Next Steps
+
+<Card title="Quick Start Guide" icon="rocket" href="/quickstart">
+  Learn how to customize your new tab experience with colors and fonts
+</Card>

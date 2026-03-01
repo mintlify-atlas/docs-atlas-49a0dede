@@ -1,0 +1,280 @@
+---
+title: Composables
+description: Reusable Vue composition functions for storage and UI utilities
+---
+
+The extension provides several composables that encapsulate reusable logic for storage, UI utilities, and data fetching.
+
+## useWebExtensionStorage
+
+A reactive wrapper around the Chrome Storage API. See the [Storage](/technical/storage) page for complete documentation.
+
+### Quick Reference
+
+```typescript
+function useWebExtensionStorage<T>(
+  key: string,
+  initialValue: MaybeRefOrGetter<T>,
+  options?: WebExtensionStorageOptions<T>
+): { data: RemovableRef<T>, dataReady: Promise<T> }
+```
+
+**Location**: `src/composables/useWebExtensionStorage.ts:46-146`
+
+### Example
+
+```typescript
+interface Settings {
+  theme: string
+  fontSize: number
+}
+
+const { data: settings, dataReady } = useWebExtensionStorage<Settings>(
+  'my_settings',
+  { theme: 'dark', fontSize: 16 },
+  { mergeDefaults: true }
+)
+
+await dataReady
+console.log(settings.value.theme) // 'dark'
+```
+
+## useUI
+
+Provides UI utility functions, including a color brightness detector.
+
+### Function Signature
+
+```typescript
+function useUI(): {
+  lightOrDark: (color: string) => 'light' | 'dark'
+}
+```
+
+**Location**: `src/composables/useUI.ts:1-76`
+
+### lightOrDark
+
+Determines whether a color is light or dark using the HSP (Highly Sensitive Poo) color model.
+
+#### Parameters
+
+<ParamField path="color" type="string" required>
+  Color value in hex format (`#RRGGBB`) or RGB format (`rgb(r, g, b)`)
+</ParamField>
+
+#### Returns
+
+<ResponseField name="result" type="'light' | 'dark'">
+  Returns `'light'` if the color's perceived brightness is > 127.5, otherwise `'dark'`
+</ResponseField>
+
+#### Algorithm
+
+From `useUI.ts:16-46`:
+
+```typescript
+const lightOrDark = (color: string) => {
+  let r, g, b, hsp
+  
+  // Parse RGB or HEX format
+  if (color?.match(/^rgb/)) {
+    color = color.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(\d+(?:\.\d+)?))?\)$/)
+    r = color[1]
+    g = color[2]
+    b = color[3]
+  } else {
+    color = +`0x${color?.slice(1).replace(color.length < 5 && /./g, '$&$&')}`
+    r = color >> 16
+    g = (color >> 8) & 255
+    b = color & 255
+  }
+
+  // HSP equation from http://alienryderflex.com/hsp.html
+  hsp = Math.sqrt(0.299 * (r * r) + 0.587 * (g * g) + 0.114 * (b * b))
+
+  return hsp > 127.5 ? 'light' : 'dark'
+}
+```
+
+The HSP formula weighs colors according to human perception:
+- Red: 29.9%
+- Green: 58.7% (humans are most sensitive to green)
+- Blue: 11.4%
+
+#### Usage Example
+
+From `NewTab.vue:71-75`:
+
+```typescript
+const { lightOrDark } = useUI()
+
+const skeletonClass = computed(() =>
+  lightOrDark(config.value.bgColor as string) === 'dark' ? 'bg-zinc-700' : 'bg-zinc-300',
+)
+```
+
+This dynamically adjusts skeleton loader colors based on the background color brightness.
+
+### Scroll Prevention
+
+The composable also disables page scrolling on mount (lines 48-70). This is useful for full-screen new tab pages:
+
+```typescript
+onMounted(async () => {
+  const wheelOpt = supportsPassive ? { passive: false } : false
+  const wheelEvent = 'onwheel' in document.createElement('div') ? 'wheel' : 'mousewheel'
+
+  window.addEventListener('DOMMouseScroll', preventDefault, false)
+  window.addEventListener(wheelEvent, preventDefault, wheelOpt)
+  window.addEventListener('touchmove', preventDefault, wheelOpt)
+  window.addEventListener('keydown', preventDefaultForScrollKeys, false)
+})
+```
+
+<Note>
+  The scroll prevention runs automatically when you use `useUI()` in a component. You don't need to call any methods to enable it.
+</Note>
+
+## fetcher
+
+A simple wrapper around the Fetch API that parses JSON responses.
+
+### Function Signature
+
+```typescript
+function fetcher(key: string): Promise<any>
+```
+
+**Location**: `src/logic/fetcher.ts:1-11`
+
+### Parameters
+
+<ParamField path="key" type="string" required>
+  URL to fetch from
+</ParamField>
+
+### Returns
+
+<ResponseField name="result" type="Promise<any>">
+  Parsed JSON response data
+</ResponseField>
+
+### Implementation
+
+```typescript
+export function fetcher(key: string) {
+  return fetch(key)
+    .then((resp) => {
+      return resp && resp.json()
+    })
+    .then((data) => {
+      if (data.message) throw new Error(data.message)
+      return data
+    })
+}
+```
+
+### Error Handling
+
+The function throws an error if the response includes a `message` property, following common API error conventions.
+
+### Usage Example
+
+From `NewTab.vue:89-93`:
+
+```typescript
+import { fetcher } from '~/logic/fetcher'
+
+async function fetchQuote() {
+  const url = 'https://gist.githubusercontent.com/fuongz/dc7bdaffc9181e7ef0b176f1f025ab22/raw/0d62f619d5ff9457e8e9f710c9fdefd463a0ee7c/quotes.json'
+  const res = await fetcher(url)
+  if (res) quote.value = getRandomQuote(res)
+}
+```
+
+## Type Definitions
+
+All composables are fully typed with TypeScript.
+
+### WebExtensionStorageOptions
+
+```typescript
+export type WebExtensionStorageOptions<T> = UseStorageAsyncOptions<T>
+```
+
+Extends VueUse's `UseStorageAsyncOptions` with these properties:
+
+- `flush?: 'pre' | 'post' | 'sync'`
+- `deep?: boolean`
+- `listenToStorageChanges?: boolean`
+- `writeDefaults?: boolean`
+- `mergeDefaults?: boolean | ((stored: T, defaults: T) => T)`
+- `shallow?: boolean`
+- `serializer?: Serializer<T>`
+- `onError?: (error: unknown) => void`
+
+### RemovableRef
+
+From `@vueuse/core`:
+
+```typescript
+type RemovableRef<T> = Ref<T> & {
+  // Set to null to remove from storage
+}
+```
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Always await dataReady">
+    ```typescript
+    const { data: config, dataReady } = useWebExtensionStorage('key', defaults)
+    
+    // Wait before accessing data
+    await dataReady
+    console.log(config.value) // Safe
+    ```
+    
+    Without awaiting, `config.value` may contain only the defaults, not the stored value.
+  </Accordion>
+
+  <Accordion title="Use mergeDefaults for evolving schemas">
+    ```typescript
+    // v1: { theme: 'dark' }
+    // v2: { theme: 'dark', fontSize: 16 }
+    
+    const { data } = useWebExtensionStorage(
+      'settings',
+      { theme: 'dark', fontSize: 16 },
+      { mergeDefaults: true } // Existing users get fontSize: 16
+    )
+    ```
+    
+    This adds new properties to existing configs without overwriting user preferences.
+  </Accordion>
+
+  <Accordion title="Type your stored data">
+    ```typescript
+    interface Config {
+      bgColor: string
+      fontSize: number
+    }
+    
+    const { data } = useWebExtensionStorage<Config>('config', defaults)
+    ```
+    
+    TypeScript will enforce the shape and catch property access errors.
+  </Accordion>
+
+  <Accordion title="Use lightOrDark for accessible contrast">
+    ```typescript
+    const { lightOrDark } = useUI()
+    const textColor = computed(() => 
+      lightOrDark(bgColor.value) === 'dark' ? 'text-white' : 'text-black'
+    )
+    ```
+    
+    This ensures text remains readable on any background color.
+  </Accordion>
+</AccordionGroup>

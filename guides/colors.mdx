@@ -1,0 +1,135 @@
+---
+title: Background Colors
+description: Customize your new tab background with preset colors or create your own with the color picker
+---
+
+Your NewTab extension allows you to customize the background color to match your preferences or mood. Choose from preset colors or create a custom color using the color picker.
+
+## Preset Background Colors
+
+The extension includes 6 carefully selected preset colors:
+
+<Tabs>
+  <Tab title="Color Swatches">
+    | Color Name | Hex Value | Description |
+    |------------|-----------|-------------|
+    | White | `#fff` | Clean, bright white |
+    | Dark Zinc | `#18181b` | Default - Deep charcoal gray |
+    | Dark Blue | `#1e3a8a` | Rich navy blue |
+    | Dark Indigo | `#312e81` | Deep purple-blue |
+    | Dark Green | `#166534` | Forest green |
+    | Dark Red | `#7f1d1d` | Deep burgundy red |
+  </Tab>
+  <Tab title="Preview">
+    The preset colors are designed to provide excellent contrast with the quote text. Five are dark colors (optimized for comfortable reading), and one is white for those who prefer a light background.
+
+    **Default Color**: The extension defaults to `#18181b` (Dark Zinc) - a sophisticated dark gray that's easy on the eyes.
+  </Tab>
+</Tabs>
+
+## Using Preset Colors
+
+1. Click the **settings icon** in the bottom-left corner
+2. Look for the **Background Color** section at the top of the settings panel
+3. Click on any color swatch to apply it immediately
+4. The selected color shows a darker border to indicate it's active
+
+```typescript
+// Preset colors array from source code
+const colors = ['#fff', '#18181b', '#1e3a8a', '#312e81', '#166534', '#7f1d1d']
+```
+
+## Custom Color Picker
+
+If the preset colors don't match your preference, you can create any custom color:
+
+### Using the Color Picker
+
+1. Click the **settings icon** to open settings
+2. In the **Background Color** section, find the last swatch (shows a "+" icon if unused, or your custom color if set)
+3. Click on it to open your browser's native color picker
+4. Select any color using the picker
+5. The background updates in real-time as you adjust the color
+
+### Color Format
+
+All colors are stored and processed as **hexadecimal values** (e.g., `#18181b`). When you use the custom color picker:
+
+- The color picker outputs a hex value
+- This value is immediately saved to Chrome Storage
+- The background color transitions smoothly to your selection
+
+```typescript
+function handleCustomColor(e: Event) {
+  const value = (e.target as HTMLInputElement).value
+  customColor.value = value
+  handleUpdateSetting('bgColor', value)
+}
+```
+
+## Light vs Dark Theme Detection
+
+The extension automatically adjusts text colors based on your background color to ensure readability:
+
+### How It Works
+
+The extension uses the **HSP (Highly Sensitive Poo) equation** to determine if a background color is light or dark:
+
+```typescript
+// From useUI.ts
+hsp = Math.sqrt(0.299 * (r * r) + 0.587 * (g * g) + 0.114 * (b * b))
+
+if (hsp > 127.5) return 'light'
+else return 'dark'
+```
+
+### Text Color Adjustments
+
+Based on the detection:
+
+- **Dark backgrounds**: Text displays in white (`text-white`) and light zinc (`text-zinc-300`) for the author
+- **Light backgrounds**: Text displays in dark zinc (`text-zinc-900`) for maximum contrast
+
+This happens automatically - you don't need to configure text colors separately.
+
+<Note>
+  The HSP equation analyzes the RGB components of your color and calculates a value between 0-255. Values above 127.5 are considered "light" and trigger dark text, while values below use light text.
+</Note>
+
+## Technical Details
+
+### Color Persistence
+
+Your color preference is saved immediately when you make a selection:
+
+```typescript
+interface Config {
+  bgColor: string  // Stored as hex value
+  // ... other settings
+}
+```
+
+### Custom Color Detection
+
+When the extension loads, it checks if your saved color is in the preset list:
+
+```typescript
+// From NewTab.vue:124-126
+if (config.value && !colors.includes(config.value.bgColor)) {
+  customColor.value = config.value.bgColor
+}
+```
+
+If not, it displays your custom color in the custom color swatch.
+
+### Smooth Transitions
+
+The background color changes use CSS transitions for a smooth visual effect:
+
+```vue
+<main class="relative transition" :style="{ backgroundColor: config.bgColor }">
+```
+
+<Note>
+  Your color preference is stored locally and persists across browser sessions. If you clear your browser data or use a different browser, you'll need to set your color preference again.
+</Note>

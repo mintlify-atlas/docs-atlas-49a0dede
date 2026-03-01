@@ -1,0 +1,128 @@
+---
+title: 'Deploy to Chrome Web Store'
+description: 'Publish your NewTab extension to the Chrome Web Store'
+icon: 'chrome'
+---
+
+This guide walks you through publishing your NewTab extension to the Chrome Web Store.
+
+## Prerequisites
+
+Before you can publish to the Chrome Web Store, you need:
+
+- A [Chrome Web Store Developer account](https://chrome.google.com/webstore/devconsole)
+- A one-time registration fee of $5
+- A Google account
+
+<Info>
+The $5 registration fee is a one-time payment that allows you to publish unlimited extensions.
+</Info>
+
+## Build and pack
+
+First, build the extension for production and create a ZIP package:
+
+<Steps>
+  <Step title="Build for production">
+    Run the build command to compile your extension:
+
+    ```bash
+    bun run build
+    ```
+
+    This runs the production build and creates optimized files in the `extension/` directory.
+  </Step>
+
+  <Step title="Create ZIP package">
+    Package the extension into a ZIP file:
+
+    ```bash
+    bun run pack:zip
+    ```
+
+    This creates `extension.zip` in your project root, which is ready for upload to the Chrome Web Store.
+  </Step>
+</Steps>
+
+<Tip>
+You can also use the automated release script to handle versioning, building, and packing in one command:
+
+```bash
+bun run release          # patch bump: 0.0.7 → 0.0.8
+bun run release:minor    # minor bump: 0.0.7 → 0.1.0
+bun run release:major    # major bump: 0.0.7 → 1.0.0
+```
+
+This automatically bumps the version, builds, packs, and creates a git tag.
+</Tip>
+
+## Upload to Chrome Web Store
+
+<Steps>
+  <Step title="Access the Developer Dashboard">
+    Go to the [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole) and sign in with your Google account.
+
+    If this is your first time, you'll need to pay the $5 registration fee.
+  </Step>
+
+  <Step title="Create or select your extension">
+    - For a new extension, click **New Item**
+    - For an existing extension, select it from your items list
+  </Step>
+
+  <Step title="Upload package">
+    Navigate to **Package** → **Upload new package**
+
+    Upload the `extension.zip` file you created in the build step.
+  </Step>
+
+  <Step title="Fill out store listing">
+    Complete all required fields for your store listing:
+
+    - **Name**: Your NewTab
+    - **Description**: Detailed description of your extension (minimum 132 characters)
+    - **Category**: Choose the most appropriate category (e.g., "Productivity")
+    - **Language**: Select your primary language
+    - **Icon**: Upload your extension icon (128x128px)
+    - **Screenshots**: Upload at least one screenshot (1280x800px or 640x400px)
+    - **Privacy Policy**: Provide a privacy policy URL if your extension collects user data
+  </Step>
+
+  <Step title="Submit for review">
+    Once all required fields are complete, click **Submit for review**.
+
+    The Chrome Web Store team will review your extension. This typically takes a few days to a week.
+  </Step>
+</Steps>
+
+## Review process
+
+After submission:
+
+- You'll receive an email when the review starts
+- The review typically takes 1-7 days
+- If approved, your extension will be published automatically
+- If rejected, you'll receive feedback on what needs to be fixed
+
+<Warning>
+Make sure your extension complies with [Chrome Web Store Program Policies](https://developer.chrome.com/docs/webstore/program-policies). Common rejection reasons include:
+
+- Insufficient or misleading description
+- Missing or low-quality screenshots
+- Privacy policy issues
+- Requesting unnecessary permissions
+</Warning>
+
+## Update an existing extension
+
+To update an already published extension:
+
+1. Increment the version in `package.json`
+2. Build and pack: `bun run build && bun run pack:zip`
+3. Go to your extension in the Developer Dashboard
+4. Upload the new `extension.zip` under **Package** → **Upload new package**
+5. Click **Submit for review**
+
+<Note>
+Users with your extension installed will automatically receive the update once it's approved and published.
+</Note>

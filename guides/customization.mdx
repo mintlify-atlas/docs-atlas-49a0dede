@@ -1,0 +1,75 @@
+---
+title: Customization Overview
+description: Learn how to customize your NewTab experience with background colors and font selections
+---
+
+Your NewTab extension provides several customization options to personalize your browsing experience. All settings are stored locally using the Chrome Storage API and persist across sessions.
+
+## Accessing Settings
+
+To customize your NewTab:
+
+1. Open a new tab
+2. Click the **settings icon** (gear icon) in the bottom-left corner
+3. The settings panel will appear with all available customization options
+
+The settings panel displays three main sections:
+- Background Color
+- Quote Font
+- Author Font
+
+## What You Can Customize
+
+### Background Colors
+
+You can change the background color of your new tab page. The extension provides:
+
+- **6 preset colors** for quick selection
+- **Custom color picker** for unlimited color options
+
+All background colors are automatically analyzed to ensure text remains readable. The extension uses an HSP (Highly Sensitive Poo) equation to determine if a color is light or dark, then adjusts the text color accordingly.
+
+See the [Colors guide](/guides/colors) for the complete list of preset colors and custom color picker details.
+
+### Font Families
+
+You can independently customize the font for both the quote text and the author name. The extension includes:
+
+- **11 carefully selected Google Fonts**
+- Separate controls for quote and author fonts
+- Dynamic font loading for optimal performance
+
+See the [Fonts guide](/guides/fonts) for the complete list of available fonts.
+
+## How Settings Are Persisted
+
+Your customization preferences are stored using the Chrome Storage API with the key `fuongz_just_random_quote`. The configuration object includes:
+
+```typescript
+interface Config {
+  bgColor: string           // Hex color value (e.g., '#18181b')
+  quoteFontFamily: string   // Font identifier (e.g., 'playfair-display')
+  authorFontFamily: string  // Font identifier (e.g., 'montserrat')
+}
+```
+
+### Default Settings
+
+If you haven't customized anything yet, the extension uses these defaults:
+
+- **Background Color**: `#18181b` (dark zinc)
+- **Quote Font**: Playfair Display
+- **Author Font**: Montserrat
+
+## Performance Considerations
+
+The extension is optimized for performance:
+
+- **Fonts load on-demand**: Only selected fonts are loaded from Google Fonts
+- **Font caching**: Once a font is loaded, it's cached for subsequent uses
+- **Smooth transitions**: A 500ms loading state prevents flickering when changing fonts
+- **Settings sync**: Your preferences are immediately saved and synchronized
+
+<Note>
+  Your settings are stored locally in your browser and are not synced across devices. If you use the extension on multiple browsers or devices, you'll need to configure each one separately.
+</Note>

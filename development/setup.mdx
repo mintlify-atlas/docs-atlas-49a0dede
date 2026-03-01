@@ -1,0 +1,125 @@
+---
+title: Development Setup
+description: Set up your development environment for Your NewTab extension
+---
+
+Get your development environment ready to start working on Your NewTab.
+
+## Prerequisites
+
+Before you begin, ensure you have the following installed:
+
+- **Node.js** (v18 or higher recommended)
+- **Bun** (package manager and runtime)
+- **Git** (for version control)
+- **Chrome** or **Firefox** browser
+
+<Info>
+This project uses [Bun](https://bun.sh) as the package manager. If you don't have it installed, run:
+```bash
+curl -fsSL https://bun.sh/install | bash
+```
+</Info>
+
+## Installation
+
+<Steps>
+  <Step title="Clone the repository">
+    Clone the Your NewTab repository to your local machine:
+    
+    ```bash
+    git clone <repository-url>
+    cd your-newtab
+    ```
+  </Step>
+
+  <Step title="Install dependencies">
+    Install all required dependencies using Bun:
+    
+    ```bash
+    bun install
+    ```
+    
+    This will install all development dependencies including Vue 3, Vite, TypeScript, and build tools.
+  </Step>
+
+  <Step title="Start the development server">
+    Choose the appropriate command based on your target browser:
+    
+    <CodeGroup>
+    ```bash Chrome/Chromium
+    bun run dev
+    ```
+    
+    ```bash Firefox
+    bun run dev-firefox
+    ```
+    </CodeGroup>
+    
+    This will:
+    - Clear previous builds
+    - Generate manifest files
+    - Start Vite dev server with HMR (Hot Module Replacement)
+    - Watch for file changes
+  </Step>
+
+  <Step title="Load the extension in your browser">
+    ### For Chrome/Chromium
+    
+    1. Open Chrome and navigate to `chrome://extensions`
+    2. Enable **Developer mode** (toggle in the top-right corner)
+    3. Click **Load unpacked**
+    4. Select the `extension/` folder from your project directory
+    
+    ### For Firefox
+    
+    1. Open Firefox and navigate to `about:debugging#/runtime/this-firefox`
+    2. Click **Load Temporary Add-on**
+    3. Navigate to the `extension/` folder and select the `manifest.json` file
+  </Step>
+
+  <Step title="Verify the installation">
+    Open a new tab in your browser. You should see the Your NewTab extension displaying a random inspirational quote.
+    
+    <Check>
+    If you see the quote display, your development environment is set up correctly!
+    </Check>
+  </Step>
+</Steps>
+
+## Development Workflow
+
+With the dev server running, you can:
+
+- Edit Vue components in `src/` and see changes instantly via HMR
+- Modify styles and see updates without reloading
+- Add new features with TypeScript support
+
+<Note>
+The development server runs on `http://localhost:3303` by default. The extension loads resources from this server during development.
+</Note>
+
+## Alternative Testing
+
+You can also use `web-ext` to run the extension in a standalone browser instance:
+
+<CodeGroup>
+```bash Chrome/Chromium
+bun run start:chromium
+```
+
+```bash Firefox
+bun run start:firefox
+```
+</CodeGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Building" icon="hammer" href="/development/building">
+    Learn how to build the extension for production
+  </Card>
+  <Card title="Release" icon="rocket" href="/development/release">
+    Understand the release process
+  </Card>
+</CardGroup>
