@@ -1,0 +1,69 @@
+{
+  "projectType": "frontend",
+  "projectName": "Your NewTab",
+  "projectDescription": "A beautiful Chrome extension that displays random inspirational quotes on every new tab",
+  "theme": "almond",
+  "primaryColor": "#18181b",
+  "lightColor": "#f4f4f5",
+  "darkColor": "#18181b",
+  "navigation": {
+    "groups": [
+      {
+        "group": "Getting Started",
+        "pages": [
+          "introduction",
+          "installation",
+          "quickstart"
+        ]
+      },
+      {
+        "group": "Guides",
+        "pages": [
+          "guides/customization",
+          "guides/fonts",
+          "guides/colors"
+        ]
+      },
+      {
+        "group": "Development",
+        "pages": [
+          "development/setup",
+          "development/building",
+          "development/release"
+        ]
+      },
+      {
+        "group": "Technical Reference",
+        "pages": [
+          "technical/architecture",
+          "technical/storage",
+          "technical/composables"
+        ]
+      },
+      {
+        "group": "Deployment",
+        "pages": [
+          "deployment/chrome-web-store",
+          "deployment/firefox-addon"
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Random inspirational quotes on every new tab",
+    "Customizable background colors with color picker",
+    "Multiple Google Fonts support for quotes and authors",
+    "Persistent settings using Chrome Storage API",
+    "Minimal and elegant user interface",
+    "Built with Vue 3 and TypeScript",
+    "Firefox and Chrome/Chromium support"
+  ],
+  "publicApiSurface": [
+    "useWebExtensionStorage - Custom composable for Chrome storage",
+    "useUI - UI utility composable for light/dark detection",
+    "fetcher - Simple fetch wrapper for API calls",
+    "Config interface - Settings configuration type",
+    "NewTab.vue - Main component",
+    "manifest configuration"
+  ]
+}
